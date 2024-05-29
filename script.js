@@ -144,29 +144,3 @@ document.addEventListener("DOMContentLoaded", function() {
         localStorage.setItem("employeeData", JSON.stringify(savedData));
     }
 });
-
-document.addEventListener("DOMContentLoaded", function() {
-    const pagination = document.querySelector('.pagination');
-    const precedentLink = pagination.querySelector('.precedent');
-    const suivantLink = pagination.querySelector('.suivant');
-    const spanPage = pagination.querySelector('span');
-    let currentPage = 1; 
-
-    precedentLink.addEventListener('click', function(e) {
-        e.preventDefault();
-        if (currentPage > 1) {
-            currentPage--;
-            spanPage.textContent = currentPage;
-
-
-        }
-    });
-
-    suivantLink.addEventListener('click', function(e) {
-        e.preventDefault();
-        currentPage++;
-        spanPage.textContent = currentPage;
-
-        
-    });
-});
