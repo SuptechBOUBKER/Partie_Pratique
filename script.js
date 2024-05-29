@@ -8,6 +8,7 @@ document.addEventListener("DOMContentLoaded", function() {
     const editForm = document.getElementById("editForm");
 
     loadSavedData();
+
     form.addEventListener("submit", function(event) {
         event.preventDefault();
 
@@ -15,22 +16,14 @@ document.addEventListener("DOMContentLoaded", function() {
         const prenom = document.getElementById("prenom").value;
         const telephone = document.getElementById("telephone").value;
         const departement = document.getElementById("departement").value;
-        const nextId = tableBody.querySelectorAll("tr").length + 1;
 
-        const newRow = document.createElement("tr");
-        newRow.setAttribute("data-id", nextId);
-        newRow.innerHTML = `
-            <td>${nextId}</td>
-            <td>${nom}</td>
-            <td>${prenom}</td>
-            <td>${telephone}</td>
-            <td>${departement}</td>
-            <td>
-                <button class="edit">Modifier</button>
-                <button class="delete">Supprimer</button>
-            </td>
-        `;
-        tableBody.appendChild(newRow);
+        if (employeeExists(nom, prenom)) {
+            alert("L'employé existe déjà.");
+            return;
+        }
+
+        const nextId = tableBody.querySelectorAll("tr").length + 1;
+        addEmployeeToTable(nextId, nom, prenom, telephone, departement);
         saveDataToLocalStorage(nextId, nom, prenom, telephone, departement);
         form.reset();
     });
@@ -43,7 +36,7 @@ document.addEventListener("DOMContentLoaded", function() {
                 row.remove();
                 modal.style.display = "none";
                 updateSavedData();
-            });
+            }, { once: true });
         } else if (event.target.classList.contains("edit")) {
             const row = event.target.closest("tr");
             const id = row.getAttribute("data-id"); 
@@ -104,20 +97,7 @@ document.addEventListener("DOMContentLoaded", function() {
         const savedData = JSON.parse(localStorage.getItem("employeeData"));
         if (savedData) {
             savedData.forEach(function(data) {
-                const newRow = document.createElement("tr");
-                newRow.setAttribute("data-id", data.id); 
-                newRow.innerHTML = `
-                    <td>${data.id}</td>
-                    <td>${data.nom}</td>
-                    <td>${data.prenom}</td>
-                    <td>${data.telephone}</td>
-                    <td>${data.departement}</td>
-                    <td>
-                        <button class="edit">Modifier</button>
-                        <button class="delete">Supprimer</button>
-                    </td>
-                `;
-                tableBody.appendChild(newRow);
+                addEmployeeToTable(data.id, data.nom, data.prenom, data.telephone, data.departement);
             });
         }
     }
@@ -143,4 +123,45 @@ document.addEventListener("DOMContentLoaded", function() {
         });
         localStorage.setItem("employeeData", JSON.stringify(savedData));
     }
+
+    function addEmployeeToTable(id, nom, prenom, telephone, departement) {
+        const newRow = document.createElement("tr");
+        newRow.setAttribute("data-id", id);
+        newRow.innerHTML = `
+            <td>${id}</td>
+            <td>${nom}</td>
+            <td>${prenom}</td>
+            <td>${telephone}</td>
+            <td>${departement}</td>
+            <td>
+                <button class="edit">Modifier</button>
+                <button class="delete">Supprimer</button>
+            </td>
+        `;
+        tableBody.appendChild(newRow);
+    }
+
+    function employeeExists(nom, prenom) {
+        const rows = tableBody.querySelectorAll("tr");
+        for (const row of rows) {
+            const cells = row.querySelectorAll("td");
+            if (cells[1].textContent === nom && cells[2].textContent === prenom) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    window.searchEmployee = function() {
+        const searchValue = document.getElementById("search-input").value.toLowerCase();
+        const rows = tableBody.querySelectorAll("tr");
+        rows.forEach(row => {
+            const nom = row.querySelector("td:nth-child(2)").textContent.toLowerCase();
+            if (nom.includes(searchValue)) {
+                row.style.display = "";
+            } else {
+                row.style.display = "none";
+            }
+        });
+    };
 });
